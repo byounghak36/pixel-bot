@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion")
     implementation("ch.qos.logback:logback-classic:1.2.9")
+    testImplementation("junit:junit:4.13.1")
 }
 
 tasks.withType<JavaCompile> {
