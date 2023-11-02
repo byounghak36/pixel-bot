@@ -3,11 +3,11 @@ plugins {
     id("com.github.johnrengelman.shadow") version "7.1.2"
 }
 
-application.mainClass = "com.pixel.jda.Bot"
+application.mainClass = "com.pixel.jda.bot"
 group = "com.pixel"
 version = "1.0"
 
-val jdaVersion = "4.4.1_353"
+val jdaVersion = "5.0.0-beta.17"
 
 repositories {
     mavenCentral()
@@ -17,7 +17,6 @@ repositories {
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion")
     implementation("ch.qos.logback:logback-classic:1.2.9")
-    testImplementation("junit:junit:4.13.1")
 }
 
 tasks.withType<JavaCompile> {
