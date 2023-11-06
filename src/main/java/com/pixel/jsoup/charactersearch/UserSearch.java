@@ -3,6 +3,7 @@ package com.pixel.jsoup.charactersearch;
 import org.jsoup.Jsoup;
 import org.jsoup.nodes.Document;
 import org.jsoup.nodes.Element;
+
 import java.io.IOException;
 import java.net.HttpURLConnection;
 import java.net.URL;
@@ -45,29 +46,32 @@ public class UserSearch {
 
             // 메이플스토리 전적검색 정리 데이터
             Element Find_Maple = doc.selectFirst(".search_com_chk");
-            Element Find_Maple_charLink = Find_Maple.selectFirst("td:eq(1) dl dt a");
 
-            // 메이플스토리 전적검색 - 개인 프로필 링크
-            String Find_Maple_charLink_Link = NexonMapleHome_URL + Find_Maple_charLink.attr("href");
+            if (Find_Maple != null) {
+                Element Find_Maple_charLink = Find_Maple.selectFirst("td:eq(1) dl dt a");
 
-            // 메이플스토리 전적검색 서버 아이콘
-            String Find_Maple_charLink_Severlcon = Find_Maple_charLink.select("img").attr("src");
+                // 메이플스토리 전적검색 - 개인 프로필 링크
+                String Find_Maple_charLink_Link = NexonMapleHome_URL + Find_Maple_charLink.attr("href");
 
-            // 메이플스토리 전적검색 - 길드 명
-            String Find_Maple_GuildName = Find_Maple.select("td:eq(5)").text();
+                // 메이플스토리 전적검색 서버 아이콘
+                String Find_Maple_charLink_Severlcon = Find_Maple_charLink.select("img").attr("src");
 
-            if (Find_Maple_GuildName.isEmpty()) {
-                Find_Maple_GuildName = "- 내용 없음 -";
+                // 메이플스토리 전적검색 - 길드 명
+                String Find_Maple_GuildName = Find_Maple.select("td:eq(5)").text();
+
+                if (Find_Maple_GuildName.isEmpty()) {
+                    Find_Maple_GuildName = "- 내용 없음 -";
+                }
+
+                // 함수 리턴 값 정보
+                Map<String, String> result = new HashMap<>();
+                result.put("HomeURL", NexonMapleHome_URL);
+                result.put("charLink", Find_Maple_charLink_Link);
+                result.put("ServerIcon", Find_Maple_charLink_Severlcon);
+                result.put("GuildName", Find_Maple_GuildName);
+
+                return result;
             }
-
-            // 함수 리턴 값 정보
-            Map<String, String> result = new HashMap<>();
-            result.put("HomeURL", NexonMapleHome_URL);
-            result.put("charLink", Find_Maple_charLink_Link);
-            result.put("ServerIcon", Find_Maple_charLink_Severlcon);
-            result.put("GuildName", Find_Maple_GuildName);
-
-            return result;
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -77,7 +81,8 @@ public class UserSearch {
 
     public static void main(String[] args) {
         UserSearch characterSearch = new UserSearch();
-        Map<String, String> characterInfo = characterSearch.searchCharacter("YourCharacterName");
+        String characterName = "훈연소세지"; // 실제 캐릭터 이름으로 변경
+        Map<String, String> characterInfo = characterSearch.searchCharacter(characterName);
 
         if (characterInfo != null) {
             System.out.println("HomeURL: " + characterInfo.get("HomeURL"));
@@ -89,3 +94,4 @@ public class UserSearch {
         }
     }
 }
+
