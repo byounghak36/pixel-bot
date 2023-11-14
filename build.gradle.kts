@@ -17,7 +17,10 @@ repositories {
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion")
     implementation("ch.qos.logback:logback-classic:1.2.9")
+    implementation("org.jsoup:jsoup:1.15.3")
     implementation("org.slf4j:slf4j-api:1.7.30")
+    implementation("com.googlecode.json-simple:json-simple:1.1.1")
+    implementation("org.mariadb.jdbc:mariadb-java-client:3.3.0")
 }
 
 tasks.withType<JavaCompile> {
