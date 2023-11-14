@@ -1,10 +1,10 @@
-package com.pixel.jda.bot;
+package com.pixel.jda.bot.core;
 
-import com.pixel.jda.listener.MessageListener;
-import com.pixel.jda.listener.ReadyListener;
+import com.pixel.jda.bot.listener.*;
 import net.dv8tion.jda.api.JDA;
 import net.dv8tion.jda.api.JDABuilder;
 import net.dv8tion.jda.api.requests.GatewayIntent;
+import net.dv8tion.jda.api.utils.MemberCachePolicy;
 
 import java.io.BufferedReader;
 import java.io.IOException;
@@ -15,7 +15,7 @@ public class BotBuilder {
 
     public static void main(String[] args) throws InterruptedException {
 
-        // src/main/resources/token 파일을 읽어서 token 변수에 저장
+        // 토큰 읽기
         ClassLoader classLoader = BotBuilder.class.getClassLoader();
         InputStream inputStream = classLoader.getResourceAsStream("token");
 
@@ -35,13 +35,14 @@ public class BotBuilder {
                 token.append(line);
             }
         } catch (IOException e) {
-            e.printStackTrace();
+            System.err.println(e.getMessage());
         }
 
         // Discord Bot 빌드 및 이벤트 리스너 등록
         JDA jda = JDABuilder.createDefault(token.toString())
-                .enableIntents(GatewayIntent.MESSAGE_CONTENT)
-                .addEventListeners(new ReadyListener(), new MessageListener())
+                .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
+                .addEventListeners(new ReadyListener(), new CommandListener(), new GuildListener(), new ButtonListener(), new ModalListener(), new AutoCompleteListener())
+                .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build();
     }
 }
