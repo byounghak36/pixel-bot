@@ -17,6 +17,7 @@ repositories {
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion")
     implementation("ch.qos.logback:logback-classic:1.2.9")
+    implementation("org.slf4j:slf4j-api:1.7.30")
 }
 
 tasks.withType<JavaCompile> {
