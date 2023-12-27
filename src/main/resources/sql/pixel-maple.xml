@@ -1,0 +1,34 @@
+<!-- mybatis -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pixel.jda.bot.mapper.MapleCharacterMapper">
+
+    <resultMap id="MapleCharacterDTO" type="MapleCharacterDTO">
+        <result property="id" column="MC_ID"/>
+        <result property="discordId" column="MC_DISCORD_ID"/>
+        <result property="characterName" column="MC_NAME"/>
+    </resultMap>
+
+    <select id="getMapleCharacterByDiscordId" parameterType="string" resultMap="MapleCharacterDTO">
+        SELECT *
+        FROM GUILD_MAIN_CHARACTER
+        WHERE MC_DISCORD_ID = #{discrod_id}
+    </select>
+
+    <select id="getMapleCharacterByName" parameterType="string" resultMap="MapleCharacterDTO">
+        SELECT *
+        FROM GUILD_MAIN_CHARACTER
+        WHERE MC_NAME = #{character_name}
+    </select>
+
+    <insert id="insertMainCharacter" parameterType="MapleCharacterDTO">
+        INSERT INTO GUILD_MAIN_CHARACTER(MC_ID, MC_DISCORD_ID, MC_NAME, MC_MAIN_YN, MC_SUB_YN)
+        VALUES (#{id}, #{discordId}, #{characterName}, '1', '0')
+    </insert>
+
+    <insert id="insertMapleNicknameChangeLog" parameterType="JSONObject">
+        INSERT INTO MAPLE_NICKNAME_HISTORY
+        VALUES (#{jo.id}, #{jo.discord_id}, NOW(), #{jo.before_name}, #{jo.after_name})
+    </insert>
+</mapper>

@@ -1,0 +1,57 @@
+<!-- mybatis -->
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.pixel.jda.bot.mapper.DiscordUserMapper">
+
+    <resultMap id="DiscordUserDTO" type="DiscordUserDTO">
+        <result property="id" column="DU_ID"/>
+        <result property="name" column="DU_NAME"/>
+        <result property="joinDate" column="DU_JOIN_DATE"/>
+        <result property="age" column="DU_AGE"/>
+        <result property="preGuild" column="DU_PRE_GUILD"/>
+        <result property="preLeaveReason" column="DU_PRE_LEAVE_REASON"/>
+        <result property="playTime" column="DU_PLAYTIME"/>
+    </resultMap>
+
+    <select id="getCountDiscordUserById" parameterType="string" resultType="int">
+        SELECT count(1)
+        FROM DISCORD_USER
+        WHERE DU_ID = #{id}
+    </select>
+
+    <select id="getDiscordUserById" parameterType="string" resultMap="DiscordUserDTO">
+        SELECT t1.*
+        FROM DISCORD_USER t1
+        WHERE DU_ID = #{id}
+    </select>
+
+    <select id="getAllDiscordUser" resultMap="DiscordUserDTO">
+        SELECT *
+        FROM DISCORD_USER
+    </select>
+
+    <insert id="insertDiscordUser" parameterType="DiscordUserDTO">
+        INSERT INTO DISCORD_USER (DU_ID, DU_NAME, DU_JOIN_DATE)
+        VALUES (#{id}, #{name}, NOW())
+    </insert>
+
+    <update id="updateDiscordUser" parameterType="DiscordUserDTO">
+        UPDATE DISCORD_USER SET
+        <trim suffixOverrides=",">
+            <if test="age != null">
+                DU_AGE = #{age},
+            </if>
+            <if test="beforeGuild != null">
+                DU_PRE_GUILD = #{preGuild},
+            </if>
+            <if test="outReason != null">
+                DU_PRE_LEAVE_REASON = #{preLeaveReason},
+            </if>
+            <if test="playTime != null">
+                DU_PLAYTIME = #{playTime},
+            </if>
+        </trim>
+        WHERE DU_ID = #{id}
+    </update>
+</mapper>

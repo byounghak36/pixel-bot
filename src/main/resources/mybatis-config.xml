@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE configuration PUBLIC "//mybatis.org//DTD Config 3.0//EN" "http://mybatis.org/dtd/mybatis-3-config.dtd" >
+<configuration>
+    <!--mapper에서 매칭할 parmeter Type 별칭 설정-->
+    <typeAliases>
+        <!-- JSONObject-->
+        <typeAlias type="org.json.simple.JSONObject" alias="JSONObject"/>
+        <typeAlias type="com.pixel.jda.bot.dto.DiscordUserDTO" alias="DiscordUserDTO"/>
+        <typeAlias type="com.pixel.jda.bot.dto.MapleCharacterDTO" alias="MapleCharacterDTO"/>
+    </typeAliases>
+
+
+    <environments default="pixel">
+        <environment id="pixel">
+            <transactionManager type="JDBC"/>
+            <!--mariaDB-->
+            <dataSource type="POOLED">
+                <property name="driver" value="org.mariadb.jdbc.Driver"/>
+                <property name="url" value="jdbc:mariadb://115.68.249.230:3306/pixel_bot_db"/>
+                <property name="username" value="pixel"/>
+                <property name="password" value="qwe1212!Q"/>
+            </dataSource>
+        </environment>
+
+    </environments>
+
+    <mappers>
+        <mapper resource="sql/pixel-discord.xml"/>
+        <mapper resource="sql/pixel-maple.xml"/>
+    </mappers>
+
+
+</configuration>
