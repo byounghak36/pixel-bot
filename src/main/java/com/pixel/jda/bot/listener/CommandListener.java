@@ -1,81 +1,169 @@
 package com.pixel.jda.bot.listener;
 
-import net.dv8tion.jda.api.EmbedBuilder;
+import com.pixel.jda.bot.dto.DiscordUserDTO;
+import com.pixel.jda.bot.dto.MapleCharacterDTO;
+import com.pixel.jda.bot.mapper.DiscordUserMapper;
+import com.pixel.jda.bot.mapper.MapleCharacterMapper;
+import com.pixel.jda.bot.util.api.NexonAPI;
+import net.dv8tion.jda.api.JDA;
+import net.dv8tion.jda.api.entities.Guild;
 import net.dv8tion.jda.api.entities.Member;
 import net.dv8tion.jda.api.events.interaction.command.SlashCommandInteractionEvent;
 import net.dv8tion.jda.api.hooks.ListenerAdapter;
-import net.dv8tion.jda.api.interactions.components.ActionRow;
-import net.dv8tion.jda.api.interactions.components.buttons.Button;
-import net.dv8tion.jda.api.interactions.components.text.TextInput;
-import net.dv8tion.jda.api.interactions.components.text.TextInputStyle;
-import net.dv8tion.jda.api.interactions.modals.Modal;
+import org.apache.ibatis.session.SqlSession;
+import org.json.simple.JSONObject;
 
-import java.util.concurrent.TimeUnit;
+import static com.pixel.jda.bot.listener.CommandList.*;
+import static com.pixel.jda.bot.util.SqlUtil.getSqlSession;
+import static com.pixel.jda.bot.util.Util.getUID;
 
 public class CommandListener extends ListenerAdapter {
 
     @Override
     public void onSlashCommandInteraction(SlashCommandInteractionEvent event) {
 
-        if (event.getName().equals("길드가입")) {
-            event.replyEmbeds(
-                    new EmbedBuilder()
-                            .setTitle("디스코드 가입")
-                            .setDescription("디스코드 가입을 하려면 아래 버튼을 눌러주세요.")
-                            .build()
-            ).addActionRow(
-                    Button.primary("guild_join", "길드 가입하기")
-            ).setEphemeral(true).queue();
-        }
+        JDA jda = event.getJDA();
+        Guild guild = event.getGuild();
+        Member member = event.getMember();
 
-        if (event.getName().equals("정보입력")) {
+        // 사용자 정보
+        DiscordUserDTO user = DiscordUserDTO.getDiscordUser(member.getId());
 
-            Member member = event.getOption("유저").getAsMember();
+        // 사용된 커멘드
+        String cmd = event.getName();
 
-            TextInput name = TextInput.create("id", "유저 UID(변경 X)", TextInputStyle.SHORT)
-                    .setRequired(true)
-                    .setValue(member.getId())
-                    .build();
+        // 커멘드 옵션을 담을 JSONObject
+        JSONObject cmdParams = new JSONObject();
 
-            TextInput age = TextInput.create("age", "나이", TextInputStyle.SHORT)
-                    .setPlaceholder("나이를 입력해 주세요.")
-                    .setRequired(true)
-                    .setMinLength(1)
-                    .build();
+        // 길드 가입
+        switch (cmd) {
+            case GUILD_JOIN -> {
+                event.getOptions().forEach(option -> {
+                    if (option.getName().equals(MAPLE_CHARACTER_NAME)) {
+                        cmdParams.put(MAPLE_CHARACTER_NAME, option.getAsString());
+                    }
+                });
 
-            TextInput preGuildName = TextInput.create("preGuildName", "이전 길드명", TextInputStyle.SHORT)
-                    .setPlaceholder("이전 길드명을 입력해 주세요.")
-                    .setRequired(true)
-                    .setMinLength(1)
-                    .build();
+                // SQL 세션 생성
+                SqlSession sqlSession = getSqlSession(false);
 
-            TextInput guildExitDesc = TextInput.create("guildExitDesc", "이전 길드 탈퇴 사유", TextInputStyle.PARAGRAPH)
-                    .setPlaceholder("이전 길드 탈퇴 사유를 입력해 주세요.")
-                    .setRequired(true)
-                    .setMinLength(1)
-                    .build();
+                try {
+                    DiscordUserMapper mapper = sqlSession.getMapper(DiscordUserMapper.class);
+                    MapleCharacterMapper mapleCharacterMapper = sqlSession.getMapper(MapleCharacterMapper.class);
 
-            TextInput playTime = TextInput.create("playTime", "플레이 시간대", TextInputStyle.SHORT)
-                    .setPlaceholder("플레이 시간대를 입력해 주세요.")
-                    .setRequired(false)
-                    .setMinLength(1)
-                    .build();
+                    if (user == null) {
 
-            Modal modal = Modal.create("modmail", "정보입력")
-                    .addComponents(ActionRow.of(name), ActionRow.of(age), ActionRow.of(preGuildName), ActionRow.of(guildExitDesc), ActionRow.of(playTime))
-                    .build();
+                        // 메이플 서버에 해당 캐릭터가 존재하는지 확인
+                        checkCharacter(event, (String) cmdParams.get(MAPLE_CHARACTER_NAME));
 
-            event.replyModal(modal).delay(100, TimeUnit.MILLISECONDS).queue();
-        }
+                        DiscordUserDTO targetUser = new DiscordUserDTO();
+                        targetUser.setId(member.getId());
+                        targetUser.setName(member.getEffectiveName());
 
-        if (event.getName().equals("닉네임변경")) {
+                        mapper.insertDiscordUser(targetUser);
 
-        }
+                        MapleCharacterDTO targetCharacter = new MapleCharacterDTO();
+                        targetCharacter.setId(getUID());
+                        targetCharacter.setDiscordId(member.getId());
+                        targetCharacter.setCharacterName((String) cmdParams.get(MAPLE_CHARACTER_NAME));
 
-        if (event.getName().equals("길드설정")) {
-            if (event.getSubcommandName().equals("신규가입-채널설정")) {
+                        mapleCharacterMapper.insertMainCharacter(targetCharacter);
+
+                        sqlSession.commit();
+
+                        event.reply("길드 가입이 완료되었습니다.").setEphemeral(false).queue();
+                    } else {
+                        event.reply("이미 가입된 유저입니다.").setEphemeral(false).queue();
+                    }
+                } catch (Exception e) {
+                    if (sqlSession != null) {
+                        sqlSession.rollback();
+                        sqlSession.close();
+                    }
+                    System.err.println(e.getMessage());
+                    event.reply("시스템에 에러가 발생하였습니다.\n관리자에게 문의 부탁드립니다.").setEphemeral(false).queue();
+                    // END
+                } finally {
+                    if (sqlSession != null) {
+                        sqlSession.close();
+                    }
+                }
+            }
+            case INSERT_USER_INFO -> {  // 유저 정보 입력
+
+                event.getOptions().forEach(option -> {
+                    if (option.getName().equals(DISCORD_USER)) {
+                        cmdParams.put(DISCORD_USER, option.getAsMember().getId());
+                    } else if (option.getName().equals(BIRTH_YEAR)) {
+                        cmdParams.put(BIRTH_YEAR, option.getAsInt());
+                    } else if (option.getName().equals(PRE_GUILD_NAME)) {
+                        cmdParams.put(PRE_GUILD_NAME, option.getAsString());
+                    } else if (option.getName().equals(PRE_GUILD_LEAVE_REASON)) {
+                        cmdParams.put(PRE_GUILD_LEAVE_REASON, option.getAsString());
+                    } else if (option.getName().equals(PLAY_TIME)) {
+                        cmdParams.put(PLAY_TIME, option.getAsString());
+                    }
+                });
+                try (SqlSession sqlSession = getSqlSession()) {
+
+                    DiscordUserMapper mapper = sqlSession.getMapper(DiscordUserMapper.class);
+
+                    DiscordUserDTO targetUser = DiscordUserDTO.getDiscordUser((String) cmdParams.get(DISCORD_USER), sqlSession);
+
+                    if (targetUser != null) {
+                        targetUser.setAge((int) cmdParams.get(BIRTH_YEAR));
+                        targetUser.setPreGuild((String) cmdParams.get(PRE_GUILD_NAME));
+                        targetUser.setPreLeaveReason((String) cmdParams.get(PRE_GUILD_LEAVE_REASON));
+                        targetUser.setPlayTime((String) cmdParams.get(PLAY_TIME));
+
+                        mapper.updateDiscordUser(targetUser);
+                        event.reply("정보가 업데이트되었습니다.").setEphemeral(false).queue();
+                        // END
+                    } else {
+                        event.reply("해당 유저는 길드가입이 되어있지 않아 정보변경이 불가능합니다.").setEphemeral(false).queue();
+                    }
+                } catch (Exception e) {
+                    System.err.println(e.getMessage());
+                    event.reply("시스템에 에러가 발생하였습니다.\n관리자에게 문의 부탁드립니다.").setEphemeral(true).queue();
+                    // END
+                }
+            }
+            case MAPLE_CHARACTER_CHANGE ->  // 메이플 닉네임 변경
+
+                    event.getOptions().forEach(option -> {
+                        if (option.getName().equals(CHANGE_MAPLE_CHARACTER_NAME)) {
+                            cmdParams.put("id", getUID());
+                            cmdParams.put("discord_id", member.getId());
+                            cmdParams.put("before_name", member.getEffectiveName());
+                            cmdParams.put("after_name", option.getAsString());
+
+
+                        }
+                    });
+            case SELECT_ALL_GUILD_USER -> {
 
             }
+        }
+    }
+
+    private void checkCharacter(SlashCommandInteractionEvent e, String characterName) {
+        NexonAPI nexonAPI = new NexonAPI();
+
+        // 메이플 서버에 해당 캐릭터가 존재하는지 확인
+        JSONObject ocid = nexonAPI.getOcid(characterName);
+        int ocid_status = (int) ocid.get("status");
+
+        // 메이플 서버에 해당 캐릭터가 존재하지 않을 시
+        if (ocid.containsKey("error")) {
+            JSONObject errorJson = (JSONObject) ocid.get("error");
+
+            String errorName = (String) errorJson.get("name");
+            String errorMessage = (String) errorJson.get("message");
+
+            e.reply("메이플 서버에 해당 캐릭터가 존재하지 않습니다.\n" +
+                    "캐릭터명: " + characterName + "\n" +
+                    "에러코드: " + errorName + "\n" +
+                    "에러메시지: " + errorMessage).setEphemeral(false).queue();
         }
     }
 }
