@@ -1,0 +1,6 @@
+# Discord Bot Token
+botToken =
+
+# Nexon OpenAPI
+mapleAPIServer = https://open.api.nexon.com/maplestory/v1
+mapleAPIKey =

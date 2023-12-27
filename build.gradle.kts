@@ -7,7 +7,7 @@ application.mainClass = "com.pixel.jda.bot"
 group = "com.pixel"
 version = "1.0"
 
-val jdaVersion = "5.0.0-beta.17"
+val jdaVersion = "5.0.0-beta.18"
 
 repositories {
     mavenCentral()
@@ -16,12 +16,15 @@ repositories {
 
 dependencies {
     implementation("net.dv8tion:JDA:$jdaVersion")
-    implementation("ch.qos.logback:logback-classic:1.2.9")
+    implementation("ch.qos.logback:logback-classic:1.4.11")
     implementation("org.jsoup:jsoup:1.15.3")
-    implementation("org.slf4j:slf4j-api:1.7.30")
-    implementation("com.googlecode.json-simple:json-simple:1.1.1")
     implementation("org.mariadb.jdbc:mariadb-java-client:3.3.0")
+    implementation("org.mybatis:mybatis:3.5.14")
+    implementation("org.projectlombok:lombok:1.18.28")
+    implementation("com.googlecode.json-simple:json-simple:1.1.1")
+    annotationProcessor("org.projectlombok:lombok:1.18.28")
 }
+
 
 tasks.withType<JavaCompile> {
     options.encoding = "UTF-8"

@@ -5,7 +5,7 @@ build/
 !**/src/test/**/build/
 
 ### Security Setting ###
-src/main/resources/token
+src/main/resources/pixel.properties
 
 
 ### IntelliJ IDEA ###
