@@ -7,7 +7,7 @@ public interface DiscordUserMapper {
 
     int getCountDiscordUserById(String id);
 
-    void insertDiscordUser(DiscordUserDTO discordUserDTO);
+    int insertDiscordUser(DiscordUserDTO discordUserDTO);
 
-    void updateDiscordUser(DiscordUserDTO discordUserDTO);
+    int updateDiscordUser(DiscordUserDTO discordUserDTO);
 }

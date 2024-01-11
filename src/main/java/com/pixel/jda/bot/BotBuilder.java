@@ -1,6 +1,6 @@
 package com.pixel.jda.bot;
 
-import com.pixel.jda.bot.listener.ButtonListener;
+import com.pixel.jda.bot.listener.AutoCompleteListener;
 import com.pixel.jda.bot.listener.CommandListener;
 import com.pixel.jda.bot.listener.GuildListener;
 import com.pixel.jda.bot.listener.ReadyListener;
@@ -53,7 +53,7 @@ public class BotBuilder {
         // Discord Bot 빌드 및 이벤트 리스너 등록
         JDA jda = JDABuilder.createDefault(properties.getProperty("botToken"))
                 .enableIntents(GatewayIntent.MESSAGE_CONTENT, GatewayIntent.GUILD_MEMBERS, GatewayIntent.GUILD_PRESENCES)
-                .addEventListeners(new ReadyListener(), new CommandListener(), new GuildListener(), new ButtonListener())
+                .addEventListeners(new ReadyListener(), new CommandListener(), new GuildListener(), new AutoCompleteListener())
                 .setMemberCachePolicy(MemberCachePolicy.ALL)
                 .build();
     }

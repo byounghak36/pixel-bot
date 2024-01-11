@@ -2,32 +2,45 @@
 <!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
         "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
 
-<mapper namespace="com.pixel.jda.bot.mapper.MapleCharacterMapper">
+<mapper namespace="com.pixel.jda.bot.mapper.CharacterMapper">
 
-    <resultMap id="MapleCharacterDTO" type="MapleCharacterDTO">
+    <resultMap id="CharacterDTO" type="CharacterDTO">
         <result property="id" column="MC_ID"/>
         <result property="discordId" column="MC_DISCORD_ID"/>
-        <result property="characterName" column="MC_NAME"/>
+        <result property="guildName" column="MC_GUILD_NAME"/>
+        <result property="characterName" column="MC_NAME" />
+        <result property="mainYn" column="MC_MAIN_YN" javaType="boolean" jdbcType="INTEGER"/>
+        <result property="subYn" column="MC_SUB_YN" javaType="boolean" jdbcType="INTEGER"/>
     </resultMap>
 
-    <select id="getMapleCharacterByDiscordId" parameterType="string" resultMap="MapleCharacterDTO">
+
+    <select id="getCharacterByDiscordId" parameterType="string" resultMap="CharacterDTO">
         SELECT *
-        FROM GUILD_MAIN_CHARACTER
-        WHERE MC_DISCORD_ID = #{discrod_id}
+        FROM GUILD_CHARACTER
+        WHERE MC_DISCORD_ID = #{discordId}
+        <if test="mainGuild">
+            AND MC_GUILD_NAME = (SELECT G_NAME FROM GUILD WHERE G_MAIN_YN = '1')
+        </if>
     </select>
 
-    <select id="getMapleCharacterByName" parameterType="string" resultMap="MapleCharacterDTO">
+    <select id="getCharacterByName" parameterType="string" resultMap="CharacterDTO">
         SELECT *
-        FROM GUILD_MAIN_CHARACTER
-        WHERE MC_NAME = #{character_name}
+        FROM GUILD_CHARACTER
+        WHERE MC_NAME = #{name}
     </select>
 
-    <insert id="insertMainCharacter" parameterType="MapleCharacterDTO">
-        INSERT INTO GUILD_MAIN_CHARACTER(MC_ID, MC_DISCORD_ID, MC_NAME, MC_MAIN_YN, MC_SUB_YN)
-        VALUES (#{id}, #{discordId}, #{characterName}, '1', '0')
+    <insert id="insertCharacter" parameterType="CharacterDTO">
+        INSERT INTO GUILD_CHARACTER(MC_ID, MC_DISCORD_ID, MC_GUILD_NAME, MC_NAME, MC_MAIN_YN, MC_SUB_YN)
+        VALUES (#{id}, #{discordId}, #{guildName}, #{characterName}, #{mainYn}, #{subYn})
     </insert>
 
-    <insert id="insertMapleNicknameChangeLog" parameterType="JSONObject">
+    <insert id="deleteCharacter" parameterType="CharacterDTO">
+        DELETE FROM GUILD_CHARACTER
+        WHERE MC_DISCORD_ID = #{discordId}
+        AND MC_NAME = #{characterName}
+    </insert>
+
+    <insert id="insertCharacterNameChangeLog" parameterType="JSONObject">
         INSERT INTO MAPLE_NICKNAME_HISTORY
         VALUES (#{jo.id}, #{jo.discord_id}, NOW(), #{jo.before_name}, #{jo.after_name})
     </insert>

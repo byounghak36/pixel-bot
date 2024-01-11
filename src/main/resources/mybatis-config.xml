@@ -6,7 +6,7 @@
         <!-- JSONObject-->
         <typeAlias type="org.json.simple.JSONObject" alias="JSONObject"/>
         <typeAlias type="com.pixel.jda.bot.dto.DiscordUserDTO" alias="DiscordUserDTO"/>
-        <typeAlias type="com.pixel.jda.bot.dto.MapleCharacterDTO" alias="MapleCharacterDTO"/>
+        <typeAlias type="com.pixel.jda.bot.dto.CharacterDTO" alias="CharacterDTO"/>
     </typeAliases>
 
 

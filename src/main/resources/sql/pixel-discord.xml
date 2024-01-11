@@ -8,7 +8,7 @@
         <result property="id" column="DU_ID"/>
         <result property="name" column="DU_NAME"/>
         <result property="joinDate" column="DU_JOIN_DATE"/>
-        <result property="age" column="DU_AGE"/>
+        <result property="birthYear" column="DU_BIRTH_YEAR"/>
         <result property="preGuild" column="DU_PRE_GUILD"/>
         <result property="preLeaveReason" column="DU_PRE_LEAVE_REASON"/>
         <result property="playTime" column="DU_PLAYTIME"/>
@@ -39,13 +39,13 @@
     <update id="updateDiscordUser" parameterType="DiscordUserDTO">
         UPDATE DISCORD_USER SET
         <trim suffixOverrides=",">
-            <if test="age != null">
-                DU_AGE = #{age},
+            <if test="birthYear != null">
+                DU_BIRTH_YEAR = #{birthYear},
             </if>
-            <if test="beforeGuild != null">
+            <if test="preGuild != null">
                 DU_PRE_GUILD = #{preGuild},
             </if>
-            <if test="outReason != null">
+            <if test="preLeaveReason != null">
                 DU_PRE_LEAVE_REASON = #{preLeaveReason},
             </if>
             <if test="playTime != null">

@@ -13,7 +13,7 @@ public class DiscordUserDTO {
 
     private String id;
     private String name;
-    private int age;
+    private int birthYear;
     private String preGuild;
     private String preLeaveReason;
     private String playTime;
